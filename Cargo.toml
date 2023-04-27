@@ -6,6 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-llm-chain = { git = "https://github.com/sobelio/llm-chain.git", rev = "d253759e49b6e46ffbdf0bf185c0c671baf0b3e2", version = "0.7.2" }
-llm-chain-openai = { git = "https://github.com/sobelio/llm-chain.git", rev = "d253759e49b6e46ffbdf0bf185c0c671baf0b3e2", version = "0.7.2" }
+llm-chain = { git = "https://github.com/sobelio/llm-chain.git", version = "0.8.1" }
+llm-chain-openai = { git = "https://github.com/sobelio/llm-chain.git", version = "0.8.1" }
 tokio = { version = "1.28.0", features = ["full"] }
