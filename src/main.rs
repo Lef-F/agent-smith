@@ -1,3 +1,5 @@
+use std::io;
+
 use llm_chain::{executor, parameters, prompt, step::Step};
 
 #[tokio::main(flavor = "current_thread")]
@@ -15,14 +17,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         command: {{cli_tool}} shell command solution goes here.
         ```
 
-        Only replace the information as required.
-        Do not include any text outside of the template.",
+        Only replace the information in the YAML template above
+        and only return that YAML template as your answer.",
         "{{user_request}}"
     ));
 
+    let mut cli_tool = String::new();
+    println!("What CLI command do you need help with?");
+    io::stdin()
+        .read_line(&mut cli_tool)
+        .expect("error: unable to read user input");
+
+    let mut user_request = String::new();
+    println!("Describe your issue:");
+    io::stdin()
+        .read_line(&mut user_request)
+        .expect("error: unable to read user input");
+
     let params = parameters!(
-        "cli_tool" => "kubectl",
-        "user_request" => "I need to list all the namespaces."
+        "cli_tool" => cli_tool.trim(),
+        "user_request" => user_request.trim()
     );
     println!("{}", step.format(&params).unwrap());
 
