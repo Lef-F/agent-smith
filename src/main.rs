@@ -4,6 +4,9 @@ use llm_chain::{executor, parameters, prompt, step::Step};
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // TODO: check if OPENAI_API_KEY key is set
+    // std::env::var("OPENAI_API_KEY").is_ok();
+
     // Create a new ChatGPT executor
     let exec = executor!()?;
     // Create our step containing our prompt template
