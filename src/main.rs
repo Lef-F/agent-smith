@@ -1,51 +1,80 @@
-use std::io;
+use std::env;
+use std::fs;
 
-use llm_chain::{executor, parameters, prompt, step::Step};
+use email_summariser::explainer;
+use llm_chain_llama::ContextParams;
 
-#[tokio::main(flavor = "current_thread")]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // TODO: check if OPENAI_API_KEY key is set
-    // std::env::var("OPENAI_API_KEY").is_ok();
+mod email_summariser;
 
-    // Create a new ChatGPT executor
-    let exec = executor!()?;
-    // Create our step containing our prompt template
-    let step = Step::for_prompt_template(prompt!(
-        "You are a specialist agent in the {{cli_tool}} commandline tool.
-        You are asked to solve an issue that the user is facing.
-        Your response has to be only the following YAML template:
+fn read_file(filename: &str) -> Result<String, std::io::Error> {
+    fs::read_to_string(filename)
+}
 
-        ```yaml
-        explanation: Your brief explanation goes here.
-        command: {{cli_tool}} shell command solution goes here.
-        ```
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args: Vec<String> = env::args().collect();
 
-        Only replace the information in the YAML template above
-        and only return that YAML template as your answer.",
-        "{{user_request}}"
-    ));
+    if args.len() != 3 {
+        eprintln!("Usage: <email-txt-file> 'your interests, comma, separated'");
+        std::process::exit(1);
+    }
 
-    let mut cli_tool = String::new();
-    println!("What CLI command do you need help with?");
-    io::stdin()
-        .read_line(&mut cli_tool)
-        .expect("error: unable to read user input");
+    let email_file = args
+        .get(1)
+        .expect("Please provide a file containing the body of the email.");
+    let interests = args
+        .get(2)
+        .expect("Please provide a comma separated string of interests.");
+    let contents = read_file(&format!("{}", email_file))?;
 
-    let mut user_request = String::new();
-    println!("Describe your issue:");
-    io::stdin()
-        .read_line(&mut user_request)
-        .expect("error: unable to read user input");
+    // println!("email file path: {}", email_file);
+    // println!("interests: {}", interests);
+    // println!("email content: {}", contents);
 
-    let params = parameters!(
-        "cli_tool" => cli_tool.trim(),
-        "user_request" => user_request.trim()
-    );
-    println!("{}", step.format(&params).unwrap());
-
-    let res = step.run(&params, &exec).await?;
-    println!("{:?}", res);
-    println!("{}", res);
+    explainer(&interests, &contents)?;
 
     Ok(())
 }
+
+// use std::fs::File;
+// use std::io::prelude::*;
+// use std::{env, io};
+
+// use crate::code_explainer::explainer;
+// mod code_explainer;
+
+// fn main() {
+//     // Get the filename from the command line arguments
+//     let args: Vec<String> = env::args().collect();
+//     if args.len() < 2 {
+//         eprintln!("Usage: {} <filename>", args[0]);
+//         return;
+//     }
+//     let filename = &args[1];
+
+//     let mut lang = String::new();
+//     println!("What language is the code written in?");
+//     io::stdin()
+//         .read_line(&mut lang)
+//         .expect("error: unable to read user input");
+
+//     // Read the file and print its contents
+//     // match read_file(filename) {
+//     //     Ok(contents) => println!("{}", contents),
+//     //     Err(e) => eprintln!("Error reading file {}: {}", filename, e),
+//     // }
+//     match read_file(filename, |contents| {
+//         explainer(&contents);
+//     }) {
+//         Ok(_) => (),
+//         Err(e) => eprintln!("Error reading file {}: {}", filename, e),
+//     }
+
+//     // explainer(lang, )
+// }
+
+// fn read_file(filename: &str) -> Result<String, std::io::Error> {
+//     let mut file = File::open(filename)?;
+//     let mut contents = String::new();
+//     file.read_to_string(&mut contents)?;
+//     Ok(contents)
+// }
